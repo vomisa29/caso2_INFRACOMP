@@ -1,4 +1,10 @@
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 public class crearReferencias {
@@ -21,50 +27,136 @@ public class crearReferencias {
         this.sizePagina = (int) Math.floor(tp/sizeOfInt);
         this.numInts = sideFiltro*sideFiltro + 2*nf*nc;
         this.paginasNecesarias = (int) Math.ceil((float) numInts/sizePagina);
+        System.out.println("tp " + tp);
         System.out.println("numInts " + numInts);
         System.out.println("paginasNecesarias " + paginasNecesarias);
         System.out.println("sizePagina " + sizePagina);
     }
 
     public void archivoReferencias(){
-        ArrayList<String> lineasArchivo = new ArrayList<String>();
+
+        String nombreArchivo = "referencias_TP"+ tp + "_NF" + nf + "_NC" + nc + ".txt";
+        Path path = Paths.get("datos/" + nombreArchivo);
+        
         matricesToPaginas();//Se llena matrizPagina de información
 
+
         //COPIA DEL ALGORITMO
+        //TODAS LAS REFERENCIAS SE CALCULAN EN ESTE PASO
         //RECUERDA REEMPLAZAR LOS COMENTARIOS CON SETTERS DE R y W
-        for(int i=1;i<nf;i++){
-            for(int j=1;j<nc;j++){
-                int acum = 0;
+        int nr = 0;
+        ArrayList<String> referenciasArchivo = new ArrayList<String>();
+
+        String posF="";
+        String posM="";
+        String posR="";
+        posPagina paginaF;
+        posPagina paginaM;
+        posPagina paginaR;
+        String lineaF="";
+        String lineaM="";
+        String lineaR="";
+
+        for(int i=1;i<nf-1;i++){
+            for(int j=1;j<nc-1;j++){
+                //int acum = 0;
                 for(int a=-1;a<=1;a++){
                     for(int b=-1;b<=1;b++){
                         int i2 = i+a;
                         int j2 = j+b;
-                        int ie = 1+a;
-                        int je = 1+b;
+                        int i3 = 1+a;
+                        int j3 = 1+b;
                         //acum += (F[i3][j3]*M[i2][j2])
+                        posF = "F" + "[" + i3  + "][" + j3 + "]";
+                        paginaF = matrizPagina.get(posF);
+                        lineaF = lineaArchivoString(posF, paginaF.getPagina(), paginaF.getDesplazamiento(), "R");
+
+                        posM = "M" + "[" + i2  + "][" + j2 + "]";
+                        paginaM = matrizPagina.get(posM);
+                        lineaM = lineaArchivoString(posM, paginaM.getPagina(), paginaM.getDesplazamiento(), "R");
+
+                        //NOTA: Es posible que toque cambiar el orden de estas dos lineas
+                        referenciasArchivo.add(lineaM);
+                        referenciasArchivo.add(lineaF);
                     }
                 }
-                if(acum>=0 && acum<=255){
-                    //R[i][j] = acum
-                }else if(acum<0){
-                    //R[i][j] = acum
-                }else{
-                    //R[i][j] = 255
-                }
-            }
-        }
 
+                //Aqui siempre se hace R[i][j] - W
+                //if(acum>=0 && acum<=255){
+                    //R[i][j] = acum
+                //}else if(acum<0){
+                    //R[i][j] = acum
+                //}else{
+                    //R[i][j] = 255
+                // }
+                posR = "R" + "[" + i  + "][" + j + "]";
+                paginaR = matrizPagina.get(posR);
+                lineaR = lineaArchivoString(posR, paginaR.getPagina(), paginaR.getDesplazamiento(), "W");
+                referenciasArchivo.add(lineaR);
+            }    
+        }
         for(int i=0;i<nc;i++){
             //R[0][i]=0
+            posR = "R" + "[" + 0 + "][" + i + "]";
+            paginaR = matrizPagina.get(posR);
+            lineaR = lineaArchivoString(posR, paginaR.getPagina(), paginaR.getDesplazamiento(), "W");
+            referenciasArchivo.add(lineaR);
             //R[nf-1][i]=255
+            posR = "R" + "[" + String.valueOf(nf-1) + "][" + i + "]";
+            paginaR = matrizPagina.get(posR);
+            lineaR = lineaArchivoString(posR, paginaR.getPagina(), paginaR.getDesplazamiento(), "W");
+            referenciasArchivo.add(lineaR);
+
         }
         for(int i=1;i<nf;i++){
             //R[i][0]=0
+            posR = "R" + "[" + i + "][" + 0 + "]";
+            paginaR = matrizPagina.get(posR);
+            lineaR = lineaArchivoString(posR, paginaR.getPagina(), paginaR.getDesplazamiento(), "W");
+            referenciasArchivo.add(lineaR);
             //R[i][nc-1]=255
+            posR = "R" + "[" + i + "][" + String.valueOf(nc-1) + "]";
+            paginaR = matrizPagina.get(posR);
+            lineaR = lineaArchivoString(posR, paginaR.getPagina(), paginaR.getDesplazamiento(), "W");
+            referenciasArchivo.add(lineaR);
+        }
+
+
+        try (BufferedWriter bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8))
+        {
+            nr= 6 + referenciasArchivo.size();
+
+            bw.write("TP=" + tp + "\n");
+            bw.write("NF=" + nf + "\n");
+            bw.write("NC=" + nc + "\n");
+            bw.write("NF_NC_Filtro=" + sideFiltro + "\n");
+            bw.write("NR=" + nr + "\n");
+            bw.write("NP=" + paginasNecesarias + "\n");
+
+            for (int i=0;i<referenciasArchivo.size();i++){
+                if(i!=referenciasArchivo.size()-1){
+                    String linea = referenciasArchivo.get(i);
+                    bw.write(linea + "\n");
+                }else{
+                    String linea = referenciasArchivo.get(i);
+                    bw.write(linea);
+                }
+                
+            }
+
+            System.out.println("Archivo creado correctamente");
+
+        }
+        catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    public void matricesToPaginas(){
+    private String lineaArchivoString(String pos, int pagina, int desplazamiento, String read_write){
+        return pos + "," + pagina + "," + desplazamiento + "," + read_write;
+    }
+
+    private void matricesToPaginas(){
 
         int numIntFiltro = sideFiltro*sideFiltro;
         int numIntDatos = nf*nc;
@@ -84,7 +176,7 @@ public class crearReferencias {
                     break;
                 }
                 int[] posMatriz = numAPosMatriz(numIntMatrizActual, tamanioMatrices[k]);
-                String llavePos = nomMatriz[k] + "[" + String.valueOf(posMatriz[0]) +"][" + String.valueOf(posMatriz[1]) + "]";//posicion del entero en terminos de la matriz correspondiente
+                String llavePos = nomMatriz[k] + "[" + posMatriz[0] +"][" + posMatriz[1] + "]";//posicion del entero en terminos de la matriz correspondiente
                 posPagina posInt = new posPagina(i, j);//posicion del entero en terminos de paginas y desplazamiento
                 
                 this.matrizPagina.put(llavePos,posInt);
@@ -100,13 +192,15 @@ public class crearReferencias {
             }
         }
 
-        for (String llavePos : this.matrizPagina.keySet()){
-            System.out.println(llavePos + " - " + this.matrizPagina.get(llavePos));
-        }
+        //for (String llavePos : this.matrizPagina.keySet()){
+        //    System.out.println(llavePos + " - " + this.matrizPagina.get(llavePos));
+        //}
+
+        //Descomentar este codigo para ver los valores almacenados en matrizPagina
 
     }
 
-    public int[] numAPosMatriz(int num, int[] tamaniosMatriz){
+    private int[] numAPosMatriz(int num, int[] tamaniosMatriz){
         //Porfavor no modificar, no se como funciona
         //Toma un número num y lo convierte a una posición i,j en una matriz
         int nf = tamaniosMatriz[0];

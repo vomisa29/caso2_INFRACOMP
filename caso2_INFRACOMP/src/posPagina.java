@@ -1,7 +1,6 @@
 public class posPagina {
     private int pagina;
     private int desplazamiento;
-    private String readWrite = "N/A";
 
     public posPagina(int pagina, int desplazamiento){
         this.pagina = pagina;
@@ -24,16 +23,8 @@ public class posPagina {
         this.desplazamiento = desplazamiento;
     }
 
-    public String getReadWrite() {
-        return readWrite;
-    }
-
-    public void setReadWrite(String readWrite) {
-        this.readWrite = readWrite;
-    }
-
     @Override
     public String toString() {
-        return "posPagina [pagina=" + pagina + ", desplazamiento=" + desplazamiento + ", read/write=" + readWrite +"]";
+        return "posPagina [pagina=" + pagina + ", desplazamiento=" + desplazamiento + "]";
     }
 }

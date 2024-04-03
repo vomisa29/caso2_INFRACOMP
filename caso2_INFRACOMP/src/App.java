@@ -5,7 +5,7 @@ public class App {
     }
 
     public App(){
-        this.crearReferencias=new crearReferencias(9,2,2);
-        crearReferencias.matricesToPaginas();
+        this.crearReferencias=new crearReferencias(16,4,4);
+        crearReferencias.archivoReferencias();
     }
 }
