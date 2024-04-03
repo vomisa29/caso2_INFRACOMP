@@ -24,7 +24,8 @@ public class crearReferencias {
         this.tp = tp;
         this.nf = nf;
         this.nc = nc;
-        this.sizePagina = (int) Math.floor(tp/sizeOfInt);
+        this.sizePagina = (int) Math.floor((float) tp/sizeOfInt);
+        System.out.println((float) tp/sizeOfInt);
         this.numInts = sideFiltro*sideFiltro + 2*nf*nc;
         this.paginasNecesarias = (int) Math.ceil((float) numInts/sizePagina);
     }
