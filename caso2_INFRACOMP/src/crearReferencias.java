@@ -27,10 +27,6 @@ public class crearReferencias {
         this.sizePagina = (int) Math.floor(tp/sizeOfInt);
         this.numInts = sideFiltro*sideFiltro + 2*nf*nc;
         this.paginasNecesarias = (int) Math.ceil((float) numInts/sizePagina);
-        System.out.println("tp " + tp);
-        System.out.println("numInts " + numInts);
-        System.out.println("paginasNecesarias " + paginasNecesarias);
-        System.out.println("sizePagina " + sizePagina);
     }
 
     public void archivoReferencias(){
@@ -42,8 +38,7 @@ public class crearReferencias {
 
 
         //COPIA DEL ALGORITMO
-        //TODAS LAS REFERENCIAS SE CALCULAN EN ESTE PASO
-        //RECUERDA REEMPLAZAR LOS COMENTARIOS CON SETTERS DE R y W
+        //TODAS LAS REFERENCIAS/LINEAS DEL ARCHIVO SE CALCULAN EN ESTE PASO
         int nr = 0;
         ArrayList<String> referenciasArchivo = new ArrayList<String>();
 
@@ -108,7 +103,7 @@ public class crearReferencias {
             referenciasArchivo.add(lineaR);
 
         }
-        for(int i=1;i<nf;i++){
+        for(int i=1;i<nf-1;i++){
             //R[i][0]=0
             posR = "R" + "[" + i + "][" + 0 + "]";
             paginaR = matrizPagina.get(posR);
@@ -124,7 +119,7 @@ public class crearReferencias {
 
         try (BufferedWriter bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8))
         {
-            nr= 6 + referenciasArchivo.size();
+            nr= referenciasArchivo.size();
 
             bw.write("TP=" + tp + "\n");
             bw.write("NF=" + nf + "\n");
@@ -144,7 +139,7 @@ public class crearReferencias {
                 
             }
 
-            System.out.println("Archivo creado correctamente");
+            System.out.println("\n-- Archivo creado correctamente --\n");
 
         }
         catch (IOException e) {
@@ -157,7 +152,8 @@ public class crearReferencias {
     }
 
     private void matricesToPaginas(){
-
+        //Calcula en que parte de las paginas quedan los enteros de las matrices
+        //Se guarde en una Tabla de Hash llamada matrizPagina
         int numIntFiltro = sideFiltro*sideFiltro;
         int numIntDatos = nf*nc;
         int numIntResultado = nf*nc;
@@ -177,17 +173,15 @@ public class crearReferencias {
                 }
                 int[] posMatriz = numAPosMatriz(numIntMatrizActual, tamanioMatrices[k]);
                 String llavePos = nomMatriz[k] + "[" + posMatriz[0] +"][" + posMatriz[1] + "]";//posicion del entero en terminos de la matriz correspondiente
-                posPagina posInt = new posPagina(i, j);//posicion del entero en terminos de paginas y desplazamiento
+                posPagina posInt = new posPagina(i, 4*j);//posicion del entero en terminos de paginas y desplazamiento
                 
                 this.matrizPagina.put(llavePos,posInt);
 
                 numIntMatrizActual-=1;
 
-                if (numIntMatrizActual==0){
-                    if (k!=2){
-                        k+=1;
-                        numIntMatrizActual = listaTamanioMatriz[k];
-                    }
+                if (numIntMatrizActual==0 && k!=2){
+                    k+=1;
+                    numIntMatrizActual = listaTamanioMatriz[k];        
                 }
             }
         }
