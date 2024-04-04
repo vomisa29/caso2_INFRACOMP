@@ -26,6 +26,9 @@ public class CalculoDatos {
         llenarHashMapReal();
         // calcularHits();
         // calcularFallas();
+        leerReferencias();
+        System.out.println("Hits: " + hits);
+        System.out.println("Fallas: " + miss);
 
     }
 
@@ -45,9 +48,7 @@ public class CalculoDatos {
 
             while ((referencia = br.readLine()) != null) {
                 // Imprime cada línea en la consola
-                if (!this.memoriaVirtual.contains(referencia)) {
-                    this.memoriaVirtual.add(referencia + ",0");
-                }
+                this.memoriaVirtual.add(referencia + ",0");
             }
 
             // Cierra el BufferedReader
@@ -62,10 +63,10 @@ public class CalculoDatos {
 
     public void llenarHashMapReal() {
         for (String referencia : this.memoriaVirtual) {
-            if (Integer.parseInt(referencia.substring(8, 9)) <= marcos) {
+            if (Integer.parseInt(referencia.substring(8, 9)) < marcos) {
                 String key = referencia.substring(0, 7);
                 if (!this.memoriaReal.containsKey(key)) {
-                    this.memoriaReal.put(key, referencia.substring(8) + ",0");
+                    this.memoriaReal.put(key, referencia.substring(8));
                 }
             }
         }
@@ -73,54 +74,63 @@ public class CalculoDatos {
         System.out.println(this.memoriaReal);
     }
 
-    // public void calcularHits() {
-    // for (String referencia : this.memoriaVirtual) {
-    // String key = referencia.substring(0, 7);
-    // if (this.memoriaReal.containsKey(key)) {
-    // this.hits++;
-    // }
-    // }
-
-    // System.out.println("Hits: " + hits);
-    // }
-
-    // public void calcularFallas() {
-    // for (String referencia : this.memoriaVirtual) {
-
-    // String key = referencia.substring(0, 7);
-    // if (!this.memoriaReal.containsKey(key)) {
-    // miss++;
-    // }
-    // }
-
-    // System.out.println("Fallas: " + miss);
-    // }
-
     public void leerReferencias() {
         for (String referencia : this.memoriaVirtual) {
             String key = referencia.substring(0, 7);
             if (this.memoriaReal.containsKey(key)) {
                 this.hits++;
+                algoritmoLRU(referencia, true);
             } else {
                 this.miss++;
-                algoritmoLRU(referencia);
+                algoritmoLRU(referencia, false);
             }
         }
+
+        System.out.println("------------------");
+        System.out.println("Memoria real actualizada:");
+        System.out.println(this.memoriaReal);
     }
 
-    public void algoritmoLRU(String referencia) {
+    public void algoritmoLRU(String referencia, Boolean hit) {
         String key = referencia.substring(0, 7);
         String value = referencia.substring(8);
 
-        for (String keyReal : this.memoriaReal.keySet()) {
+        if (hit) {
+            this.memoriaReal.replace(key, value.substring(0, 5) + value.substring(5).replace('0', '2'));
+        } else {
 
-            // Caso cuando hay paginas no referenciadas
-            if (this.memoriaReal.get(keyReal).substring(13, 14).equals("0")) {
-                this.memoriaReal.remove(keyReal);
-                this.memoriaReal.put(key, value.replace(value.charAt(14), '1'));
+            for (String keyReal : this.memoriaReal.keySet()) {
+
+                // Caso cuando hay pagina no referenciadas "0"
+                if (this.memoriaReal.get(keyReal).substring(5).equals("0")) {
+                    this.memoriaReal.remove(keyReal);
+                    this.memoriaReal.put(key, value.replace(value.charAt(6), '1'));
+                }
+
+                // Cuando no esta referenciada pero si modificada "1"
+                else if (this.memoriaReal.get(keyReal).substring(5).equals("1")) {
+                    this.memoriaReal.remove(keyReal);
+                    this.memoriaReal.put(key, value.replace(value.charAt(6), '3'));
+                }
+
+                else if (this.memoriaReal.get(keyReal).substring(5).equals("2")) {
+                    this.memoriaReal.remove(keyReal);
+                    if ((value.length() == 7 ? value.charAt(5) : value.charAt(4)) == 'W') {
+                        this.memoriaReal.put(key, value.replace(value.charAt(6), '3'));
+                    } else {
+                        this.memoriaReal.put(key, value.replace(value.charAt(6), '2'));
+                    }
+                }
+
+                else if (this.memoriaReal.get(keyReal).substring(5).equals("3")) {
+                    this.memoriaReal.remove(keyReal);
+                    this.memoriaReal.put(key, value.replace(value.charAt(6), '3'));
+
+                }
+
             }
 
-            // Logica demas casos
         }
     }
+
 }
