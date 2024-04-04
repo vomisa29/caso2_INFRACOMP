@@ -2,14 +2,16 @@ import java.util.Scanner;
 
 public class App {
     private crearReferencias crearReferencias;
+    private CalculoDatos calculoDatos;
+
     public static void main(String[] args) throws Exception {
         new App();
     }
 
-    public App(){
+    public App() {
         Boolean continuar = true;
         Scanner sc = new Scanner(System.in);
-        while(continuar){
+        while (continuar) {
             System.out.println("Caso 2 - INFRACOMP");
             System.out.println("1- Generación Referencias.");
             System.out.println("2- Calcular datos: número de fallas de página, porcentaje de hits, tiempos.");
@@ -17,8 +19,8 @@ public class App {
             System.out.println("Que desea hacer: ");
             String entrada = sc.nextLine();
 
-            switch(entrada){
-                case("1"):
+            switch (entrada) {
+                case ("1"):
                     System.out.println("Digite: \n");
                     System.out.println("Tamaño Pagina (en bytes)");
                     int tp = Integer.valueOf(sc.nextLine());
@@ -26,23 +28,30 @@ public class App {
                     int nf = Integer.valueOf(sc.nextLine());
                     System.out.println("Número Columnas");
                     int nc = Integer.valueOf(sc.nextLine());
-                    this.crearReferencias=new crearReferencias(tp,nf,nc);
+                    this.crearReferencias = new crearReferencias(tp, nf, nc);
                     this.crearReferencias.archivoReferencias();
                     break;
-                case("2"):
+                case ("2"):
                     System.out.println("Opción 2");
-                    break;
-                case("3"):
+                    System.out.println("Digite: \n");
+                    System.out.println("Número de marcos de pagina");
+                    int marcos = Integer.valueOf(sc.nextLine());
+                    System.out.println("Nombre del archivo de referencias");
+                    String archivo = sc.nextLine();
+                    this.calculoDatos = new CalculoDatos(marcos, archivo);
+                    this.calculoDatos.calcularDatos();
+
+                case ("3"):
                     System.out.println("Fin Programa");
-                    continuar=false;
+                    continuar = false;
                     sc.close();
                     break;
 
                 default:
                     System.out.println("Digite una opción valida");
-                break;
+                    break;
             }
         }
-        
+
     }
 }
