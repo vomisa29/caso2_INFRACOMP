@@ -61,15 +61,12 @@ public class CalculoDatos {
             }
 
             while ((referencia = br.readLine()) != null) {
-                // Imprime cada línea en la consola
-                // System.out.println(referencia);
                 this.memoriaVirtual.add(referencia + ",0");
             }
 
-            // Cierra el BufferedReader
             br.close();
-            // System.out.println(memoriaVirtual);
-            // System.out.println(memoriaVirtual.size());
+            System.out.println(memoriaVirtual);
+            System.out.println(memoriaVirtual.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -77,22 +74,36 @@ public class CalculoDatos {
     }
 
     public void llenarHashMapReal() {
-        int memoria = this.marcos * (this.tp / 4);
+        // int memoria = this.marcos * (this.tp / 4);
         // System.out.println("memoria: " + memoria);
         int contador = 0;
         for (String referencia : this.memoriaVirtual) {
-            if (contador < memoria) {
-                String key = referencia.substring(0, 7);
+            // if (contador < memoria) {
+            // String key = referencia.substring(0, 7);
+            // if (!this.memoriaReal.containsKey(key)) {
+            // this.memoriaReal.put(key,
+            // referencia.substring(8).replace(referencia.charAt(referencia.length() - 1),
+            // '1'));
+            // contador++;
+
+            // }
+            // }
+
+            if (referencia.charAt(referencia.length() - 1) < (char) marcos) {
+                // String key = referencia.substring(0, 7);
+                String key = String.valueOf(referencia.charAt(referencia.length() - 1))
                 if (!this.memoriaReal.containsKey(key)) {
                     this.memoriaReal.put(key, referencia.substring(8));
-                    contador++;
                 }
+                contador++;
             }
-            // System.out.println(contador);
+
         }
+        this.miss = contador;
+        this.hits = -contador;
 
         System.out.println(this.memoriaReal);
-        System.out.println(this.memoriaReal.size());
+        System.out.println("Tamanio memoria real " + this.memoriaReal.size());
     }
 
     public void leerReferencias() {
@@ -115,15 +126,12 @@ public class CalculoDatos {
     public void algoritmoLRU(String referencia, Boolean hit) {
         String key = referencia.substring(0, 7);
         String value = referencia.substring(8);
-
         if (hit) {
-            // System.out.println(value.substring(5));
-            char bit = (value.length() == 7 ? value.charAt(6) : value.charAt(7));
+            char bit = value.charAt(value.length() - 1);
             if (bit == '0') {
                 this.memoriaReal.replace(key, value.substring(0, 5) + value.substring(5).replace('0', '2'));
             } else if (bit == '1') {
-                this.memoriaReal.replace(key, value.substring(0, 5) + value.substring(5).replace('1', '3'));
-
+                this.memoriaReal.replace(key, value.substring(0, 5) + value.substring(5).replace('0', '3'));
             }
         } else {
 
