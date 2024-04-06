@@ -49,10 +49,10 @@ public class CalculoDatos {
 
             // this.tp = Integer.parseInt(br.readLine().substring(3));
 
-            for (int i = 1; i < 6; i++) {
+            for (int i = 1; i < 7; i++) {
                 try {
                     referencia = br.readLine();
-                    if (i == 4) {
+                    if (i == 5) {
                         this.numRegistros = Integer.parseInt(referencia.substring(3));
                     }
                 } catch (IOException e) {
@@ -88,9 +88,7 @@ public class CalculoDatos {
 
             // }
             // }
-
             if (Integer.parseInt(referencia.substring(8, 10).replace(",", "")) < marcos) {
-                // String key = referencia.substring(0, 7);
                 String key = referencia.substring(8, 10).replace(",", "");
                 if (!this.memoriaReal.containsKey(key)) {
                     ArrayList<String> lista = new ArrayList<String>();
