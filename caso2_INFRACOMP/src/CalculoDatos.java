@@ -3,6 +3,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 public class CalculoDatos {
 
@@ -12,8 +16,8 @@ public class CalculoDatos {
     private String archivo;
     private int numRegistros;
     private double porcentajeHits;
-    private HashMap<String, ArrayList<String>> memoriaReal = new HashMap<String, ArrayList<String>>();
-    private ArrayList<String> memoriaVirtual = new ArrayList<String>();
+    private final HashMap<String, ArrayList<String>> memoriaReal = new HashMap<String, ArrayList<String>>();
+    private final Queue<String> colaReferencias = new LinkedList<>(); 
 
     public CalculoDatos(int marcos, String archivo) {
         this.marcos = marcos;
@@ -51,19 +55,20 @@ public class CalculoDatos {
             }
 
             while ((referencia = br.readLine()) != null) {
-                this.memoriaVirtual.add(referencia + ",0");
+                colaReferencias.add(referencia);
             }
+    
 
             br.close();
-            System.out.println(memoriaVirtual);
-            System.out.println(memoriaVirtual.size());
+            System.out.println(colaReferencias);
+            System.out.println(colaReferencias.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void llenarHashMapReal() {
-        for (String referencia : this.memoriaVirtual) {
+        for (String referencia : this.colaReferencias) {
             if (Integer.parseInt(referencia.substring(8, 10).replace(",", "")) < marcos) {
                 String key = referencia.substring(8, 10).replace(",", "");
                 if (!this.memoriaReal.containsKey(key)) {
@@ -83,7 +88,7 @@ public class CalculoDatos {
     }
 
     public void leerReferencias() {
-        for (String referencia : this.memoriaVirtual) {
+        for (String referencia : this.colaReferencias) {
             String pagina = referencia.substring(8, 10).replace(",", "");
             if (this.memoriaReal.containsKey(pagina)) {
                 this.hits++;
@@ -222,4 +227,65 @@ public class CalculoDatos {
             }
         }
     }
+
+    public synchronized String obtenerProximaReferencia() {
+        return colaReferencias.poll(); 
+    }
+
+    public synchronized void procesarReferencia(String referencia) {
+        String[] partes = referencia.split(",");
+        String numeroPagina = partes[1]; 
+    
+        if (memoriaReal.containsKey(numeroPagina)) {
+            hits++;
+        } else {
+            miss++;
+            if (memoriaReal.size() < marcos) {
+                memoriaReal.put(numeroPagina, new ArrayList<>(List.of("1"))); // Ejemplo de inicialización
+            } else {
+                
+                manejarMissYReemplazo(numeroPagina);
+            }
+        }
+    }
+
+
+    public synchronized void actualizarBitsR() {
+        
+        memoriaReal.forEach((numeroPagina, atributos) -> {
+            String bitR = atributos.get(0); // Asumiendo que el primer elemento es el bit R.
+            int valorBitR = Integer.parseInt(bitR);
+            valorBitR = Math.max(0, valorBitR - 1); 
+            atributos.set(0, String.valueOf(valorBitR));
+        });
+    }
+    
+    private void manejarMissYReemplazo(String numeroPagina) {
+        String paginaAReemplazar = identificarPaginaAReemplazar(); 
+        if (paginaAReemplazar != null) {
+            memoriaReal.remove(paginaAReemplazar); 
+            memoriaReal.put(numeroPagina, new ArrayList<>(List.of("1"))); // Añade la nueva página.
+        }
+       
+    }
+    
+    private String identificarPaginaAReemplazar() {
+        String paginaAReemplazar = null;
+        long ultimoAccesoMasAntiguo = Long.MAX_VALUE;
+    
+        for (Map.Entry<String, ArrayList<String>> entrada : memoriaReal.entrySet()) {
+            
+            long ultimoAcceso = Long.parseLong(entrada.getValue().get(1));
+            
+            if (ultimoAcceso < ultimoAccesoMasAntiguo) {
+                ultimoAccesoMasAntiguo = ultimoAcceso;
+                paginaAReemplazar = entrada.getKey();
+            }
+        }
+    
+        return paginaAReemplazar;
+    }
+    
+
+    
 }
