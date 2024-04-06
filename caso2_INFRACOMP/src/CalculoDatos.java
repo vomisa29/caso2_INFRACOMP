@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -237,18 +238,22 @@ public class CalculoDatos {
         String numeroPagina = partes[1]; 
     
         if (memoriaReal.containsKey(numeroPagina)) {
+            
             hits++;
         } else {
+            
             miss++;
             if (memoriaReal.size() < marcos) {
-                memoriaReal.put(numeroPagina, new ArrayList<>(List.of("1"))); // Ejemplo de inicialización
+                
+                ArrayList<String> nuevaLista = new ArrayList<>(Arrays.asList("bitR", "tiempoUltimoAcceso"));
+                memoriaReal.put(numeroPagina, nuevaLista); // Aquí se añade la nueva página
             } else {
                 
                 manejarMissYReemplazo(numeroPagina);
             }
         }
     }
-
+    
 
     public synchronized void actualizarBitsR() {
         
@@ -264,22 +269,25 @@ public class CalculoDatos {
         String paginaAReemplazar = identificarPaginaAReemplazar(); 
         if (paginaAReemplazar != null) {
             memoriaReal.remove(paginaAReemplazar); 
-            memoriaReal.put(numeroPagina, new ArrayList<>(List.of("1"))); // Añade la nueva página.
+            ArrayList<String> nuevaLista = new ArrayList<>(Arrays.asList("bitR", "tiempoUltimoAcceso"));
+            memoriaReal.put(numeroPagina, nuevaLista); // Añade la nueva página
         }
-       
     }
+    
     
     private String identificarPaginaAReemplazar() {
         String paginaAReemplazar = null;
         long ultimoAccesoMasAntiguo = Long.MAX_VALUE;
     
         for (Map.Entry<String, ArrayList<String>> entrada : memoriaReal.entrySet()) {
-            
-            long ultimoAcceso = Long.parseLong(entrada.getValue().get(1));
-            
-            if (ultimoAcceso < ultimoAccesoMasAntiguo) {
-                ultimoAccesoMasAntiguo = ultimoAcceso;
-                paginaAReemplazar = entrada.getKey();
+            ArrayList<String> atributos = entrada.getValue();
+            if (atributos.size() > 1) {
+                long ultimoAcceso = Long.parseLong(atributos.get(1));
+                
+                if (ultimoAcceso < ultimoAccesoMasAntiguo) {
+                    ultimoAccesoMasAntiguo = ultimoAcceso;
+                    paginaAReemplazar = entrada.getKey();
+                }
             }
         }
     
