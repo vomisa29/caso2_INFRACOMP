@@ -76,7 +76,6 @@ public class CalculoDatos {
     public void llenarHashMapReal() {
         // int memoria = this.marcos * (this.tp / 4);
         // System.out.println("memoria: " + memoria);
-        // int contador = 0;
         for (String referencia : this.memoriaVirtual) {
             // if (contador < memoria) {
             // String key = referencia.substring(0, 7);
@@ -92,7 +91,7 @@ public class CalculoDatos {
                 String key = referencia.substring(8, 10).replace(",", "");
                 if (!this.memoriaReal.containsKey(key)) {
                     ArrayList<String> lista = new ArrayList<String>();
-                    lista.add("2");
+                    lista.add("3");
                     // lista.add(referencia);
                     this.memoriaReal.put(key, lista);
                 }
@@ -106,8 +105,8 @@ public class CalculoDatos {
             }
 
         }
-        this.miss = marcos;
-        this.hits = -marcos;
+        this.miss = this.memoriaReal.size();
+        this.hits = -this.memoriaReal.size();
 
         System.out.println(this.memoriaReal);
         System.out.println("Tamanio memoria real " + this.memoriaReal.size());
