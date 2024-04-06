@@ -31,7 +31,7 @@ public class App {
                     this.crearReferencias = new crearReferencias(tp, nf, nc);
                     this.crearReferencias.archivoReferencias();
                     break;
-                    
+
                 case ("2"):
                     System.out.println("Opción 2");
                     System.out.println("Digite: \n");
@@ -41,14 +41,14 @@ public class App {
                     String archivo = sc.nextLine();
                     this.calculoDatos = new CalculoDatos(marcos, archivo);
                     this.calculoDatos.calcularDatos();
-                
+
                     // Iniciar los threads después de procesar las referencias iniciales.
                     Thread threadEstado = new Thread(new ActualizadorEstado(calculoDatos));
                     Thread threadBitR = new Thread(new ActualizadorBitR(calculoDatos));
-                
+
                     threadEstado.start();
                     threadBitR.start();
-                
+
                     // Espera a que los threads terminen (opcional, dependiendo de tu caso de uso).
                     try {
                         threadEstado.join();
@@ -56,7 +56,7 @@ public class App {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                
+
                     break;
 
                 case ("3"):
