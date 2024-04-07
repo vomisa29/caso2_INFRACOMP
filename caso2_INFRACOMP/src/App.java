@@ -40,6 +40,11 @@ public class App {
                     String archivo = sc.nextLine();
                     this.calculoDatos = new CalculoDatos(marcos, archivo);
                     this.calculoDatos.calcularDatos();
+                    // this.calculoDatos.calcularDatos();
+                    // Thread hilo1 = new LectorReferencias(this.calculoDatos);
+                    // Thread hilo2 = new Restarter(this.calculoDatos);
+                    // hilo1.start();
+                    // hilo2.start();
 
                 case ("3"):
                     System.out.println("Fin Programa");

@@ -24,16 +24,19 @@ public class CalculoDatos {
 
         llenarListaVirtual();
         llenarHashMapReal();
-        leerReferencias();
-        System.out.println("Hits: " + this.hits);
-        System.out.println("Fallas: " + this.miss);
-        System.out.println("Numero referencias: " + this.numRegistros);
-        this.porcentajeHits = (double) this.hits / (this.numRegistros) * 100;
-        this.porcentajeHits = Math.round(porcentajeHits * 100.0) / 100.0;
-        System.out.println("Porcentaje de hits: " + porcentajeHits + "%");
+        Thread hilo1 = new LectorReferencias(this);
+        Thread hilo2 = new Restarter(this);
+        hilo1.start();
+        hilo2.start();
+        // System.out.println("Hits: " + this.hits);
+        // System.out.println("Fallas: " + this.miss);
+        // System.out.println("Numero referencias: " + this.numRegistros);
+        // this.porcentajeHits = (double) this.hits / (this.numRegistros) * 100;
+        // this.porcentajeHits = Math.round(porcentajeHits * 100.0) / 100.0;
+        // System.out.println("Porcentaje de hits: " + porcentajeHits + "%");
     }
 
-    public void llenarListaVirtual() {
+    public synchronized void llenarListaVirtual() {
         try {
             FileReader fr = new FileReader("datos/" + this.archivo);
             BufferedReader br = new BufferedReader(fr);
@@ -55,8 +58,8 @@ public class CalculoDatos {
             }
 
             br.close();
-            System.out.println(memoriaVirtual);
-            System.out.println(memoriaVirtual.size());
+            // System.out.println(memoriaVirtual);
+            // System.out.println(memoriaVirtual.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,28 +81,48 @@ public class CalculoDatos {
         this.miss = this.memoriaReal.size();
         this.hits = -this.memoriaReal.size();
 
-        System.out.println(this.memoriaReal);
-        System.out.println("Tamanio memoria real " + this.memoriaReal.size());
+        // System.out.println(this.memoriaReal);
+        // System.out.println("Tamanio memoria real " + this.memoriaReal.size());
     }
 
-    public void leerReferencias() {
-        for (String referencia : this.memoriaVirtual) {
-            String pagina = referencia.substring(8, 10).replace(",", "");
-            if (this.memoriaReal.containsKey(pagina)) {
-                this.hits++;
-                algoritmoLRU(referencia, true);
-            } else {
-                this.miss++;
-                algoritmoLRU(referencia, false);
-            }
+    public synchronized void leerReferencias() {
+        // for (String referencia : this.memoriaVirtual) {
+        // String pagina = referencia.substring(8, 10).replace(",", "");
+        // if (this.memoriaReal.containsKey(pagina)) {
+        // this.hits++;
+        // algoritmoLRU(referencia, true);
+        // } else {
+        // this.miss++;
+        // algoritmoLRU(referencia, false);
+        // }
+        // }
+        String referencia = this.memoriaVirtual.get(0);
+        String pagina = referencia.substring(8, 10).replace(",", "");
+        if (this.memoriaReal.containsKey(pagina)) {
+            this.hits++;
+            algoritmoLRU(referencia, true);
+        } else {
+            this.miss++;
+            algoritmoLRU(referencia, false);
+        }
+        this.memoriaVirtual.remove(0);
+
+        if (this.memoriaVirtual.size() == 0) {
+            System.out.println("Hits: " + this.hits);
+            System.out.println("Fallas: " + this.miss);
+            System.out.println("Numero referencias: " + this.numRegistros);
+            this.porcentajeHits = (double) this.hits / (this.numRegistros) * 100;
+            this.porcentajeHits = Math.round(porcentajeHits * 100.0) / 100.0;
+            System.out.println("Porcentaje de hits: " + porcentajeHits + "%");
+            System.exit(0);
         }
 
-        System.out.println("------------------");
-        System.out.println("Memoria real actualizada:");
-        System.out.println(this.memoriaReal);
+        // System.out.println("------------------");
+        // System.out.println("Memoria real actualizada:");
+        // System.out.println(this.memoriaReal);
     }
 
-    public void algoritmoLRU(String referencia, Boolean hit) {
+    public synchronized void algoritmoLRU(String referencia, Boolean hit) {
         String pagina = referencia.substring(8, 10).replace(",", "");
         char operacion = referencia.charAt(referencia.length() - 3);
 
@@ -208,7 +231,7 @@ public class CalculoDatos {
         }
     }
 
-    public void restart() {
+    public synchronized void restart() {
         for (String key : this.memoriaReal.keySet()) {
             String value = this.memoriaReal.get(key).get(0);
             if (value == "3") {
@@ -221,5 +244,6 @@ public class CalculoDatos {
                 this.memoriaReal.replace(key, lista);
             }
         }
+
     }
 }
