@@ -41,6 +41,11 @@ public class App {
                     String archivo = sc.nextLine();
                     this.calculoDatos = new CalculoDatos(marcos, archivo);
                     this.calculoDatos.calcularDatos();
+                    // this.calculoDatos.calcularDatos();
+                    // Thread hilo1 = new LectorReferencias(this.calculoDatos);
+                    // Thread hilo2 = new Restarter(this.calculoDatos);
+                    // hilo1.start();
+                    // hilo2.start();
 
                     // Iniciar los threads después de procesar las referencias iniciales.
                     Thread threadEstado = new Thread(new ActualizadorEstado(calculoDatos));
