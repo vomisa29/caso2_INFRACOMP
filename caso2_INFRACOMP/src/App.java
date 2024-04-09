@@ -48,21 +48,21 @@ public class App {
                     // hilo2.start();
 
                     // Iniciar los threads después de procesar las referencias iniciales.
-                    Thread threadEstado = new Thread(new ActualizadorEstado(calculoDatos));
-                    Thread threadBitR = new Thread(new ActualizadorBitR(calculoDatos));
+                    // Thread threadEstado = new Thread(new ActualizadorEstado(calculoDatos));
+                    // Thread threadBitR = new Thread(new ActualizadorBitR(calculoDatos));
 
-                    threadEstado.start();
-                    threadBitR.start();
+                    // threadEstado.start();
+                    // threadBitR.start();
 
                     // Espera a que los threads terminen (opcional, dependiendo de tu caso de uso).
-                    try {
-                        threadEstado.join();
-                        threadBitR.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    // try {
+                    // threadEstado.join();
+                    // threadBitR.join();
+                    // } catch (InterruptedException e) {
+                    // e.printStackTrace();
+                    // }
 
-                    break;
+                    // break;
 
                 case ("3"):
                     System.out.println("Fin Programa");

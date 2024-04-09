@@ -2,12 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
 
 public class CalculoDatos {
 
@@ -17,8 +12,8 @@ public class CalculoDatos {
     private String archivo;
     private int numRegistros;
     private double porcentajeHits;
-    private final HashMap<String, ArrayList<String>> memoriaReal = new HashMap<String, ArrayList<String>>();
-    private final Queue<String> colaReferencias = new LinkedList<>();
+    private HashMap<String, ArrayList<String>> memoriaReal = new HashMap<String, ArrayList<String>>();
+    private ArrayList<String> memoriaVirtual = new ArrayList<String>();
 
     public CalculoDatos(int marcos, String archivo) {
         this.marcos = marcos;
@@ -59,7 +54,7 @@ public class CalculoDatos {
             }
 
             while ((referencia = br.readLine()) != null) {
-                colaReferencias.add(referencia);
+                this.memoriaVirtual.add(referencia + ",0");
             }
 
             br.close();
@@ -71,7 +66,7 @@ public class CalculoDatos {
     }
 
     public void llenarHashMapReal() {
-        for (String referencia : this.colaReferencias) {
+        for (String referencia : this.memoriaVirtual) {
             if (Integer.parseInt(referencia.substring(8, 10).replace(",", "")) < marcos) {
                 String key = referencia.substring(8, 10).replace(",", "");
                 if (!this.memoriaReal.containsKey(key)) {
@@ -101,26 +96,26 @@ public class CalculoDatos {
         // algoritmoLRU(referencia, false);
         // }
         // }
-        // String referencia = this.memoriaVirtual.get(0);
-        // String pagina = referencia.substring(8, 10).replace(",", "");
-        // if (this.memoriaReal.containsKey(pagina)) {
-        // this.hits++;
-        // algoritmoLRU(referencia, true);
-        // } else {
-        // this.miss++;
-        // algoritmoLRU(referencia, false);
-        // }
-        // this.memoriaVirtual.remove(0);
+        String referencia = this.memoriaVirtual.get(0);
+        String pagina = referencia.substring(8, 10).replace(",", "");
+        if (this.memoriaReal.containsKey(pagina)) {
+            this.hits++;
+            algoritmoLRU(referencia, true);
+        } else {
+            this.miss++;
+            algoritmoLRU(referencia, false);
+        }
+        this.memoriaVirtual.remove(0);
 
-        // if (this.memoriaVirtual.size() == 0) {
-        // System.out.println("Hits: " + this.hits);
-        // System.out.println("Fallas: " + this.miss);
-        // System.out.println("Numero referencias: " + this.numRegistros);
-        // this.porcentajeHits = (double) this.hits / (this.numRegistros) * 100;
-        // this.porcentajeHits = Math.round(porcentajeHits * 100.0) / 100.0;
-        // System.out.println("Porcentaje de hits: " + porcentajeHits + "%");
-        // System.exit(0);
-        // }
+        if (this.memoriaVirtual.size() == 0) {
+            System.out.println("Hits: " + this.hits);
+            System.out.println("Fallas: " + this.miss);
+            System.out.println("Numero referencias: " + this.numRegistros);
+            this.porcentajeHits = (double) this.hits / (this.numRegistros) * 100;
+            this.porcentajeHits = Math.round(porcentajeHits * 100.0) / 100.0;
+            System.out.println("Porcentaje de hits: " + porcentajeHits + "%");
+            System.exit(0);
+        }
 
         // System.out.println("------------------");
         // System.out.println("Memoria real actualizada:");
@@ -251,68 +246,4 @@ public class CalculoDatos {
         }
 
     }
-
-    public synchronized String obtenerProximaReferencia() {
-        return colaReferencias.poll();
-    }
-
-    public synchronized void procesarReferencia(String referencia) {
-        String[] partes = referencia.split(",");
-        String numeroPagina = partes[1];
-
-        if (memoriaReal.containsKey(numeroPagina)) {
-
-            hits++;
-        } else {
-
-            miss++;
-            if (memoriaReal.size() < marcos) {
-
-                ArrayList<String> nuevaLista = new ArrayList<>(Arrays.asList("bitR", "tiempoUltimoAcceso"));
-                memoriaReal.put(numeroPagina, nuevaLista); // Aquí se añade la nueva página
-            } else {
-
-                manejarMissYReemplazo(numeroPagina);
-            }
-        }
-    }
-
-    public synchronized void actualizarBitsR() {
-
-        memoriaReal.forEach((numeroPagina, atributos) -> {
-            String bitR = atributos.get(0); // Asumiendo que el primer elemento es el bit R.
-            int valorBitR = Integer.parseInt(bitR);
-            valorBitR = Math.max(0, valorBitR - 1);
-            atributos.set(0, String.valueOf(valorBitR));
-        });
-    }
-
-    private void manejarMissYReemplazo(String numeroPagina) {
-        String paginaAReemplazar = identificarPaginaAReemplazar();
-        if (paginaAReemplazar != null) {
-            memoriaReal.remove(paginaAReemplazar);
-            ArrayList<String> nuevaLista = new ArrayList<>(Arrays.asList("bitR", "tiempoUltimoAcceso"));
-            memoriaReal.put(numeroPagina, nuevaLista); // Añade la nueva página
-        }
-    }
-
-    private String identificarPaginaAReemplazar() {
-        String paginaAReemplazar = null;
-        long ultimoAccesoMasAntiguo = Long.MAX_VALUE;
-
-        for (Map.Entry<String, ArrayList<String>> entrada : memoriaReal.entrySet()) {
-            ArrayList<String> atributos = entrada.getValue();
-            if (atributos.size() > 1) {
-                long ultimoAcceso = Long.parseLong(atributos.get(1));
-
-                if (ultimoAcceso < ultimoAccesoMasAntiguo) {
-                    ultimoAccesoMasAntiguo = ultimoAcceso;
-                    paginaAReemplazar = entrada.getKey();
-                }
-            }
-        }
-
-        return paginaAReemplazar;
-    }
-
 }
